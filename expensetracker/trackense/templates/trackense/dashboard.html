@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Dashboard</h2>
+
+    <!-- Combined Quick Add Section -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#expense-form">Add Expense</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#income-form">Add Income</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="expense-form">
+                            <form method="post" action="{% url 'add_expense' %}" class="row g-3">
+                                {% csrf_token %}
+                                <div class="col-md-3">
+                                    <input type="text" name="title" class="form-control" placeholder="Title" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="number" name="amount" class="form-control" placeholder="Amount" step="0.01" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <select name="category" class="form-select" required>
+                                        <option value="">Select Category</option>
+                                        {% for choice in expense_categories %}
+                                            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="date" name="date" class="form-control" required>
+                                </div>
+                                <div class="col-12 mt-3">
+                                    <button type="submit" class="btn btn-primary">Add Expense</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade" id="income-form">
+                            <form method="post" action="{% url 'add_income' %}" class="row g-3">
+                                {% csrf_token %}
+                                <div class="col-md-3">
+                                    <input type="text" name="title" class="form-control" placeholder="Title" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="number" name="amount" class="form-control" placeholder="Amount" step="0.01" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <select name="category" class="form-select" required>
+                                        <option value="">Select Category</option>
+                                        {% for choice in income_categories %}
+                                            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="date" name="date" class="form-control" required>
+                                </div>
+                                <div class="col-12 mt-3">
+                                    <button type="submit" class="btn btn-success">Add Income</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Summary Section -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'expense_list' %}" class="btn btn-outline-primary mb-2">View All Expenses</a>
+                    <a href="{% url 'income_list' %}" class="btn btn-outline-success mb-2">View All Income</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Section - Moved to bottom right -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Income vs Expenses</h5>
+                </div>
+                <div class="card-body">
+                    <div style="width: 50%; margin-left: auto;">
+                        <canvas id="financeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Finance Chart
+    const financeCtx = document.getElementById('financeChart').getContext('2d');
+    new Chart(financeCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Income', 'Expenses'],
+            datasets: [{
+                data: [{{ total_income }}, {{ total_expenses }}],
+                backgroundColor: [
+                    '#2ECC71',
+                    '#E74C3C'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}
