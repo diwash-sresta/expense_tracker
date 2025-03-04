@@ -2,78 +2,31 @@
 {% load custom_tags %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-4 fade-in">
     <h2>My Expenses</h2>
 
-    <!-- Quick Add Section -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Quick Add Expense</h5>
-                </div>
-                <div class="card-body">
-                    <form method="post" action="{% url 'add_expense' %}" class="row g-3">
-                        {% csrf_token %}
-                        <div class="col-md-6">
-                            <input type="text" name="title" class="form-control" placeholder="Title" required>
-                        </div>
-                        <div class="col-md-6">
-                            <input type="number" name="amount" class="form-control" placeholder="Amount" step="0.01" required>
-                        </div>
-                        <div class="col-md-6">
-                            <select name="category" class="form-select" required>
-                                <option value="">Select Category</option>
-                                {% for choice in expense_categories %}
-                                    <option value="{{ choice.0 }}">{{ choice.1 }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <input type="date" name="date" class="form-control" required>
-                        </div>
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary">Add Expense</button>
-                        </div>
-                    </form>
-                </div>
+    <!-- Filter Form -->
+    <div class="d-flex justify-content-between mb-3">
+        <a href="{% url 'add_expense' %}" class="btn btn-primary">Add New Expense</a>
+        <form method="get" class="d-flex">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-filter"></i> Filter By: 
+                    {% if selected_category %}
+                        {{ selected_category|get_item:expense_categories }}
+                    {% else %}
+                        All Categories
+                    {% endif %}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="categoryDropdown">
+                    <li><a class="dropdown-item" href="?">All Categories</a></li>
+                    {% for value, label in expense_categories %}
+                        <li><a class="dropdown-item" href="?category={{ value }}">{{ label }}</a></li>
+                    {% endfor %}
+                </ul>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">Quick Add Income</h5>
-                </div>
-                <div class="card-body">
-                    <form method="post" action="{% url 'add_income' %}" class="row g-3">
-                        {% csrf_token %}
-                        <div class="col-md-6">
-                            <input type="text" name="title" class="form-control" placeholder="Title" required>
-                        </div>
-                        <div class="col-md-6">
-                            <input type="number" name="amount" class="form-control" placeholder="Amount" step="0.01" required>
-                        </div>
-                        <div class="col-md-6">
-                            <select name="category" class="form-select" required>
-                                <option value="">Select Category</option>
-                                {% for choice in income_categories %}
-                                    <option value="{{ choice.0 }}">{{ choice.1 }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <input type="date" name="date" class="form-control" required>
-                        </div>
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-success">Add Income</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+        </form>
     </div>
-    
-    <a href="{% url 'add_expense' %}" class="btn btn-primary mb-3">Add New Expense</a>
     
     {% if not grouped_expenses %}
         <div class="alert alert-info">
@@ -144,6 +97,7 @@
                                         <th>Category</th>
                                         <th>Amount</th>
                                         <th>Description</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -153,11 +107,20 @@
                                             <td>{{ expense.category }}</td>
                                             <td>${{ expense.amount|floatformat:2 }}</td>
                                             <td>{{ expense.description }}</td>
+                                            <td>
+                                                <a href="{% url 'edit_expense' expense.pk %}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-danger" 
+                                                        onclick="confirmDelete('{% url 'delete_expense' expense.pk %}')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
                                         </tr>
                                     {% endfor %}
                                     <tr class="table-info">
                                         <td colspan="2"><strong>Daily Total</strong></td>
-                                        <td colspan="2"><strong>${{ totals|get_item:date|floatformat:2 }}</strong></td>
+                                        <td colspan="3"><strong>${{ totals|get_item:date|floatformat:2 }}</strong></td>
                                     </tr>
                                 </tbody>
                             </table>
