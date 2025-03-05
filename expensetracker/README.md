@@ -30,7 +30,7 @@ source venv/bin/activate  # On Windows use `venv\Scripts\activate
 ### 3. Install Dependencies
 Install the required Python dependencies using pip:
 ```
-uv pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 ### 4. Run Tailwind CSS
 Since Tailwind CSS is already configured in the project, you don't need to install or initialize it. Simply run the following command to start the Tailwind CSS build process:
